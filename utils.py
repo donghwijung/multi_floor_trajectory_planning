@@ -49,21 +49,45 @@ class MinheapPQ:
 def check_in_2d_array(test,array):
     return any(np.array_equal(x, test) for x in array)
 
+def find_index_in_2d_array(test,array):
+    idx = 0
+    for x in array:
+        if np.array_equal(x, test):
+            return idx
+        else:
+            idx += 1
+    return False
+
 def getDist(pos1, pos2):
     return np.sqrt(sum([(pos1[0] - pos2[0]) ** 2, (pos1[1] - pos2[1]) ** 2, (pos1[2] - pos2[2]) ** 2]))
 
 def calcCost(initparams, pos1, pos2):
     pos_diff = (pos1[0] - pos2[0], pos1[1] - pos2[1], pos1[2] - pos2[2])
+    # print(pos1, pos2)
     if pos1[2] == pos2[2]:
-        return np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2)
+        cost = np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2)
+        cost /= initparams.robot_speed
+        # return np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2) / initparams.robot_speed
     else:
         if initparams.Alldirec[(pos_diff[0], pos_diff[1], pos_diff[2])] > 1: # staris
             if pos_diff[2] > 0: # stair down
-                return np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2 + pos_diff[2]**2)
+                cost = (np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2 + pos_diff[2]**2))
+                cost /= initparams.robot_speed
+                # return (np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2 + abs(pos_diff[2]**2))) / initparams.robot_speed
             else: # stair up
-                return np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2) +  2*abs(pos_diff[2])
+                cost = (np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2 + pos_diff[2]**2))
+                cost /= initparams.robot_speed
+                # return (np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2 + 2*abs(pos_diff[2]**2))) / initparams.robot_speed
         else: # elevators
-            return np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2 + pos_diff[2]**2)
+            # return np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2 + pos_diff[2]**2)
+            cost = (np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2 + pos_diff[2]**2))
+            cost /= initparams.elv_speed
+            # addi = (abs(initparams.curr_elv_loc - initparams.start[2]) / initparams.elv_speed) / (abs(initparams.start[2] - initparams.goal[2] / initparams.z_voxel_resol))
+            addi = (abs(initparams.curr_elv_loc - initparams.start[2]) / initparams.elv_speed)
+            # print(addi, cost, addi+cost)
+            cost += addi
+            # return (np.sqrt(pos_diff[0] ** 2 + pos_diff[1] ** 2 + abs(pos_diff[2]**2))) / initparams.robot_speed
+    return cost
 
 def heuristic_fun(initparams, k, t=None):
     if t is None:
